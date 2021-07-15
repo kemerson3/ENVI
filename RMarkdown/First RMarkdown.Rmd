@@ -1,0 +1,39 @@
+---
+title: "First R Markdown Document"
+author: "Kyle Emerson"
+date: "7/6/2021"
+output: html_document
+---
+
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+#three tick marks say its going to be code and the lower case r says it will be in r not python
+library(ggplot2)
+library(readr)
+library(dplyr)
+library(tidyr)
+install.packages("gt")
+library(gt)
+disasters <- read_csv(file, skip = 6, col_names = TRUE, col_types = "ciifffffcfffffccfffccnnfcccciiiiiiiiiiinnnn")
+s <- (min(disasters$Year))
+e <- (max(disasters$Year))
+'''
+
+
+plot(pressure)
+```
