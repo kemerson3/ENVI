@@ -8,19 +8,18 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(warning = TRUE)
 ```
+   Albasini Dam in South Africa has been hypothesized to be experiencing a decrease in precipitation over the last 4 decades. To evaluate this hypothesis, daily precipitation records taken from the Albasini Dam weather station have been accumulated with the purpose of statistically anyalyzing any trends of precipitation over this time.
+   
+   We evaluated the annual precipitation over the course of 1980-2020 and found despite a large outlier of precipitation in 2000, no discernable trend was discovered (Fig. 1). We then compiled the average precipitation per month over the duration of 1980-2020 and saw the largest proportion of precipitation occured over the summer months (Fig. 2). To evaluate the significance of our data, we conducted a Two Sample t-test to compare the annual precipitation during two time intervals: 1980-2000 and 2001-2020. The results of this t-test found that these two time interval samples were not statistically significant from each other (t = 0.32064, p = 0.7493). Despite this non-significant result, we did evaluate a slight decrease in annual precipitation in the 2001-2020 time interval, signalling that there may be a trend of decreasing precipitation in the area (Fig. 3). 
+   
+   Despite not finding any statistcally significant data to support our claim that precipitation is decreasing in this area, further investigation is required to evaluate precipitation trends. Further studies could widen the time parameters (i.e. start evaluation from 1960-2020) while still evaluating hydrologic years. Further, decreasing the width of our time intervals from 20 to 5 years could yield more information regarding recent precipitation trends. 
+   
+   
+
+
+
 ## Precipitation Patterns  
 *Albasini Dam, South Africa*  
-
-### Instructions  
-**Due 27 July 2021**  
-This homework is due by class time on Tuesday.  You will upload both the R Markdown document (this file) and the output hypertext markup language (HTML) document (the output knit produces) to your GitHub repository.  Please be sure to update your name in the *author* field in the header information of this document.  Be careful, the warnings are currently set not to appear; you may wish to turn them on (TRUE) until you are confident in your file.  
-
-Your assignment is to produce two graphs based on data from the Albasini Dam weather station in South Africa.  First, a bar graph that shows annual precipitation over the period 1980 to 2020.  Second, an average monthly precipitation graph with the standard deviation shown as error bars on the figure.  For each, you should use ggplot2 to generate nice figures and you should write clear, concise figure captions below each figure in the Rmd document (they should not be a part of your figure).  Lastly, you should use a t-test to draw a conclusion about the period 1980-2000 compared to 2000-2020.  Along with your t-test results, include a boxplot that compares these populations (hint: use a long data frame format).  
-
-This Rmd file will not run correctly.  I have included many pieces of code that you will need to get you started; however, you will need to make considerable additions.  I have not put in any code that is outright wrong, but I may have removed parts that will make the line not run or not run properly.  I have *tried* not to make anything appear misleading - you can tell me if I did a good job.  
-
-Lastly, in your Rmd file, you should remove these instructions and begin the assignment with an introduction the two figures and analysis (one or two sentances).  The figures and captions, and the t-test results and interpretation are the most important components, thus worth the vast majority of the points of the homework.  
-
 ```{r include=FALSE}
 library(readr)
 library(dplyr)
@@ -66,11 +65,16 @@ annual <- prcp %>%
       summarize(total = sum(`DAILY RAIN`, na.rm = TRUE))
 ggplot(annual, aes(x = hydro.y, y = total) ) +
       geom_bar(stat = "identity", fill = "steelblue") +
+      ggtitle ("Annual Precipitation at Albasini Dam, South Africa") +
+      theme(plot.title = element_text(face = "bold", size = (13), colour = "steelblue4")) +
       labs(x = "Year", y = "Annual Precipitation (mm)") +
       theme(panel.background = element_rect(fill = "white", colour = "black")) +
       theme(aspect.ratio = 1) +
-      theme(axis.text = element_text(face = "plain", size = 12))
+      theme(axis.text = element_text(face = "plain", size = 11)) +
+      theme(axis.title = element_text(face = "bold", size = 12))  
 ```
+
+Figure 1: Annual precipitation over the time period of 1980-2020. Annual precipitation is presented in millimeters and was obtained from the Albasini Dam weather station in South Africa. Years are represented as hydrologic years, which run from August to July in South Africa.
 
 ### Typical Monthly Precipitation
 
@@ -90,45 +94,52 @@ mon_pattern$m <- factor(c("Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar"
 ggplot(mon_pattern, aes(x = fct_reorder(m, mon), y = prcp)) + # fct_reorder is a command from forcats library that orders the factor, m (the name of the month)
       geom_bar(stat = "identity", fill = "steelblue") +
       geom_errorbar(aes(ymin = prcp-std, ymax = prcp+std), width = .1, position = position_dodge(.9)) +
+      ggtitle ("Average Monthly Precipitation at Albasini Dam, South Africa") +
+      theme(plot.title = element_text(face = "bold", size = (13), colour = "steelblue4")) +
       labs(x = "Month" , y = "Average Monthly Precipitation (mm)" ) +
       theme(panel.background = element_rect(fill = "white", colour = "black")) +
       theme(aspect.ratio = 1) +
-      theme(axis.text = element_text(face = "plain", size = 8))
+      theme(axis.text = element_text(face = "plain", size = 11)) +
+   theme(axis.title = element_text(face = "bold", size = 12))  
 
 
 ```
+
+Figure 2: Average precipitation per month over the time period of 1980-2020. Average precipitation is presented in millimeters and was obtained from the Albasini Dam weather station in South Africa. Years are represented as hydrologic years, which run from August to July in South Africa. Error bars were calculated as the means +/- standard deviation.
 
 ### T-test for the Scores 1980-2000 compared to 2001-2020
 
 ```{r echo=FALSE}
 # t.test
 prcp1980 <- prcp %>%
-      filter(hydro.y < 2000) %>%
+      filter(hydro.y <= 2000) %>%
       group_by(hydro.y) %>%
       summarize(total = sum(`DAILY RAIN`, na.rm = TRUE))
 prcp2000 <- prcp %>%
-      filter(hydro.y > 2001 ) %>%
+      filter(hydro.y >= 2001 ) %>%
       group_by(hydro.y) %>%
       summarize(total = sum(`DAILY RAIN`, na.rm = TRUE))
 t <- t.test(prcp1980, prcp2000)
-annual$score <- as.character(annual$hydro.y) # preallocation
+annual$Interval <- as.character(annual$hydro.y) # preallocation
 for (i in 1:(nrow(annual)))  {
       if (annual$hydro.y[i] <= 2000) {
-            annual$score[i] <- "1981-2000"
+            annual$Interval[i] <- "1981-2000"
       } else {
-            annual$score[i] <- "2001-2020"
+            annual$Interval[i] <- "2001-2020"
       }
 }
-ggplot(annual, aes(x=score, y = total, fill = score)) +
+ggplot(annual, aes(x= Interval, y = total, fill = Interval)) +
       geom_boxplot() +
       stat_summary(fun = "mean", geom = "point", shape = 8, size = 2, color = "white") +
       labs(x = "Year", y = "Annual Precipitation (mm)") +
       theme(panel.background = element_rect(fill = "white", colour = "black")) +
       theme(aspect.ratio = 1) +
-      ggtitle("Annual Precipitation Albasini Dam, South Africa") +
-      theme(plot.title = element_text(face = "bold", size = (12), colour = "steelblue4")) +
-      theme(axis.text = element_text(face = "bold", size = 10))  
+      ggtitle("Annual Precipitation at Albasini Dam, South Africa") +
+      theme(plot.title = element_text(face = "bold", size = (13), colour = "steelblue4")) +
+      theme(axis.text = element_text(face = "bold", size = 11))  +
+      theme(axis.title = element_text(face = "bold", size = 12))  
 
 ```
 
-The t-test shows p = `t$p.value` > 0.05.  This suggests that these two populations are not statistically different.  The trend shown by the boxplot is consistant with the overall decrease in precipitation in the region.  
+Figure 3: Annual precipitation over the course of 1981-2000 and 2001-2020. Annual precipitation is presented in millimeters and was calculated by averaging the annual precipitation of every year within each time interval. Data was obtained from the Albasini Dam weather station in South Africa. Years are represented as hydrologic years, which run from August to July in South Africa. The t-test shows p = 0.7493. This suggests that these two populations are not statistically different.  The trend shown by the boxplot is consistent with the overall decrease in precipitation in the region. White asterisks represent the mean of the data. In each box plot, the center line represents the median, the length of the box extends through the IQR, and whiskers extend to 1.5x the IQR. All points outsde this range are plotted individually.
+
