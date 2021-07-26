@@ -66,7 +66,7 @@ annual <- prcp %>%
       summarize(total = sum(`DAILY RAIN`, na.rm = TRUE))
 ggplot(annual, aes(x = hydro.y, y = total) ) +
       geom_bar(stat = "identity", fill = "steelblue") +
-      labs(x = "Year", y = "Annual Precipitation (in)") +
+      labs(x = "Year", y = "Annual Precipitation (mm)") +
       theme(panel.background = element_rect(fill = "white", colour = "black")) +
       theme(aspect.ratio = 1) +
       theme(axis.text = element_text(face = "plain", size = 12))
@@ -89,11 +89,11 @@ mon_pattern$m <- factor(c("Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar"
 
 ggplot(mon_pattern, aes(x = fct_reorder(m, mon), y = prcp)) + # fct_reorder is a command from forcats library that orders the factor, m (the name of the month)
       geom_bar(stat = "identity", fill = "steelblue") +
-      geom_errorbar() +
-      labs(x = "Month" , y = "Average Monthly Precipitation (in)" ) +
+      geom_errorbar(aes(ymin = prcp-std, ymax = prcp+std), width = .1, position = position_dodge(.9)) +
+      labs(x = "Month" , y = "Average Monthly Precipitation (mm)" ) +
       theme(panel.background = element_rect(fill = "white", colour = "black")) +
       theme(aspect.ratio = 1) +
-      theme(axis.text = element_text(face = "plain", size = 12))
+      theme(axis.text = element_text(face = "plain", size = 8))
 
 
 ```
@@ -103,28 +103,32 @@ ggplot(mon_pattern, aes(x = fct_reorder(m, mon), y = prcp)) + # fct_reorder is a
 ```{r echo=FALSE}
 # t.test
 prcp1980 <- prcp %>%
-      filter(hydro.y < ) %>%
-      group_by() %>%
-      summarize(total = )
+      filter(hydro.y < 2000) %>%
+      group_by(hydro.y) %>%
+      summarize(total = sum(`DAILY RAIN`, na.rm = TRUE))
 prcp2000 <- prcp %>%
-      filter(hydro.y > ) %>%
-      group_by() %>%
-      summarize(total = )
-t <- t.test()
+      filter(hydro.y > 2001 ) %>%
+      group_by(hydro.y) %>%
+      summarize(total = sum(`DAILY RAIN`, na.rm = TRUE))
+t <- t.test(prcp1980, prcp2000)
 annual$score <- as.character(annual$hydro.y) # preallocation
-for (i in ) {
-      if () {
+for (i in 1:(nrow(annual)))  {
+      if (annual$hydro.y[i] <= 2000) {
             annual$score[i] <- "1981-2000"
       } else {
             annual$score[i] <- "2001-2020"
       }
 }
-ggplot(annual) +
+ggplot(annual, aes(x=score, y = total, fill = score)) +
       geom_boxplot() +
+      stat_summary(fun = "mean", geom = "point", shape = 8, size = 2, color = "white") +
       labs(x = "Year", y = "Annual Precipitation (mm)") +
       theme(panel.background = element_rect(fill = "white", colour = "black")) +
       theme(aspect.ratio = 1) +
-      theme(axis.text = element_text(face = "plain", size = 12))
+      ggtitle("Annual Precipitation Albansi Dam, South Africa") +
+      theme(plot.title = element_text(face = "bold", size = (12), colour = "steelblue4")) +
+      theme(axis.text = element_text(face = "bold", size = 10))  
+
 ```
 
 The t-test shows p = `t$p.value` > 0.05.  This suggests that these two populations are not statistically different.  The trend shown by the boxplot is consistant with the overall decrease in precipitation in the region.  
